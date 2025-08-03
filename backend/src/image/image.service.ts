@@ -15,7 +15,7 @@ export class ImageService {
   // Create a new image record in the database
   // Stores metadata about the uploaded image including filename and URL
   create(data: { filename: string; originalName?: string; url: string }) {
-    return this.prisma.image.create({ data });
+    return this.prisma.image.create({ data }); 
   }
 
   // Retrieve all images from the database that still have valid files on disk
