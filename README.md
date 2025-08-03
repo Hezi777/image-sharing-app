@@ -1,33 +1,57 @@
-# Image Sharing App
-
-**A full-stack image sharing platform powered by React, NestJS, and PostgreSQL.**
-
-&#x20;        &#x20;
+# IMAGE-SHARING-APP
 
 ---
 
 ## Table of Contents
 
+- [Project Overview](#project-overview)
+- [Tech Stack](#tech-stack)
 - [Features](#features)
 - [Project Structure](#project-structure)
-- [Setup and Installation](#setup-and-installation)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
   - [Backend](#backend)
   - [Frontend](#frontend)
-- [Running the App](#running-the-app)
-- [Folder Structure](#folder-structure)
+- [Environment Configuration](#environment-configuration)
+- [Database Setup](#database-setup)
+- [Running the Application](#running-the-application)
+  - [Development](#development)
+  - [Production](#production)
+- [API Documentation](#api-documentation)
+- [Database Schema](#database-schema)
 - [Screenshots](#screenshots)
+- [Contributing](#contributing)
 - [License](#license)
+
+---
+
+## Project Overview
+
+A modern, full-stack image gallery inspired by Instagram, allowing users to upload images, view them in a dynamic feed, like them, and add comments. Built with React and NestJS, the app features real-time updates and an intuitive interface.
+
+Images are stored locally and metadata is managed in a PostgreSQL database using Prisma ORM.
+
+---
+
+## Tech Stack
+
+| Layer    | Technology                                                   |
+| -------- | ------------------------------------------------------------ |
+| Frontend | React 19, TypeScript, Material‑UI (MUI), React Router, Axios |
+| Backend  | NestJS 9, TypeScript, Prisma ORM, PostgreSQL, Multer         |
+| Database | PostgreSQL 14 with Prisma migrations                         |
+| Storage  | Local filesystem (`uploads/` folder)                         |
 
 ---
 
 ## Features
 
-- **Image Upload** with client-side preview prior to submission
-- **Gallery View** displaying all uploaded images
-- **Like & Comment** functionality on images
-- **RESTful API** endpoints for upload, retrieval, like, and comment operations
-- **Local Storage** of image files in `uploads/` folder
-- **PostgreSQL** database for metadata (likes, comments, filenames, URLs)
+- **Image Upload** with drag-and-drop, preview, and validation
+- **Gallery Feed** with image metadata and infinite scroll
+- **Like & Comment** with optimistic UI updates
+- **Responsive Design** via MUI
+- **RESTful API** for interaction with the backend
+- **Local Storage** for images and PostgreSQL for structured metadata
 
 ---
 
@@ -35,86 +59,143 @@
 
 ```
 root/
-├── backend/        # NestJS server (TypeScript)
-├── frontend/       # React app (TypeScript + MUI)
-└── README.md       # Project overview and setup instructions
+├── backend/        # NestJS server
+│   ├── src/        # Controllers, services, modules
+│   ├── uploads/    # Stored image files
+│   └── prisma/     # Schema & migration files
+├── frontend/       # React application
+│   ├── src/        # Components, pages, hooks, API client
+│   ├── public/     # Static assets and index.html
+└── README.md       # This documentation
 ```
 
 ---
 
-## Setup and Installation
+## Prerequisites
+
+- Node.js 16+
+- PostgreSQL 14+
+- Git
+
+---
+
+## Installation
 
 ### Backend
 
-1. **Navigate to backend folder**
-   ```bash
-   cd backend
-   ```
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-3. **Configure environment**
-   - Copy `.env.example` to `.env`
-   - Update `DATABASE_URL` with your PostgreSQL connection string
-4. **Run database migrations**
-   ```bash
-   npx prisma migrate dev --name init
-   ```
-5. **Start the server**
-   ```bash
-   npm run start:dev
-   ```
+```bash
+cd backend
+npm install
+cp .env.example .env  # or manually create .env
+# configure DATABASE_URL in .env
+npx prisma migrate dev --name init
+npm run start:dev
+```
 
 ### Frontend
 
-1. **Navigate to frontend folder**
-   ```bash
-   cd frontend
-   ```
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-3. **Start the development server**
-   ```bash
-   npm start
-   ```
+```bash
+cd frontend
+npm install
+# configure API endpoint in .env
+npm start
+```
 
 ---
 
-## Running the App
+## Environment Configuration
 
-1. Ensure PostgreSQL is running and the backend database is migrated.
-2. In one terminal, start the backend:
-   ```bash
-   cd backend
-   npm run start:dev
-   ```
-3. In another terminal, start the frontend:
-   ```bash
-   cd frontend
-   npm start
-   ```
-4. Open your browser at `http://localhost:3000` to view the app.
+### Backend `.env`
+
+```dotenv
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+PORT=3001
+UPLOAD_DIR=./uploads
+```
+
+### Frontend `.env`
+
+```dotenv
+REACT_APP_API_URL=http://localhost:3001/api
+```
 
 ---
 
-## Folder Structure
+## Database Setup
 
-- **backend/**: NestJS application
-  - `src/` – route controllers, services, modules
-  - `uploads/` – stored image files
-  - `prisma/` – schema & migrations
-- **frontend/**: React application
-  - `src/` – components, pages, API client via Axios
-  - `public/` – static assets, `index.html`
+```bash
+npx prisma generate
+npx prisma migrate deploy
+```
+
+---
+
+## Running the Application
+
+### Development
+
+```bash
+# Terminal 1
+cd backend && npm run start:dev
+
+# Terminal 2
+cd frontend && npm start
+```
+
+### Production
+
+```bash
+# Backend
+cd backend
+npm run build
+npm run start:prod
+
+# Frontend
+cd frontend
+npm run build
+serve -s build
+```
+
+---
+
+## API Documentation
+
+| Method | Endpoint              | Description                       |
+| ------ | --------------------- | --------------------------------- |
+| POST   | `/images/upload`      | Upload a new image                |
+| GET    | `/images`             | Retrieve all images with comments |
+| POST   | `/images/:id/like`    | Like or unlike an image           |
+| POST   | `/images/:id/comment` | Add a comment to an image         |
+
+---
+
+## Database Schema
+
+```prisma
+model Image {
+  id           Int       @id @default(autoincrement())
+  filename     String
+  originalName String
+  url          String
+  createdAt    DateTime  @default(now())
+  likes        Int       @default(0)
+  comments     Comment[]
+}
+
+model Comment {
+  id         Int      @id @default(autoincrement())
+  imageId    Int
+  text       String
+  createdAt  DateTime @default(now())
+  image      Image    @relation(fields: [imageId], references: [id])
+}
+```
 
 ---
 
 ## Screenshots
 
-> *Add your screenshots to **``** and update the paths below.*
+> *Add screenshots to **`frontend/public/screenshots/`** and update paths.*
 
 | Gallery View | Upload Form |
 | ------------ | ----------- |
@@ -122,9 +203,17 @@ root/
 
 ---
 
-## License
+## Contributing
 
-This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
+1. Fork the repo
+2. Create a new branch (`git checkout -b feature/some-feature`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to your fork (`git push origin feature/some-feature`)
+5. Open a Pull Request
 
 ---
+
+## License
+
+Licensed under the [MIT License](./LICENSE).
 
