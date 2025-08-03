@@ -1,0 +1,413 @@
+Here’s a granular, end-to-end checklist. Tackle one numbered step at a time, verifying as you go:
+
+---
+
+### 🔨 **Backend Setup (NestJS + Prisma + Postgres)**
+
+1. **Install Nest CLI & scaffold**
+
+   ```bash
+   npm i -g @nestjs/cli
+   nest new backend
+   cd backend
+   ```
+
+2. **Configure your Postgres connection**
+
+   * Create a `.env` in `backend/`:
+
+     ```
+     DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DBNAME?schema=public"
+     ```
+   * Install dotenv support:
+
+     ```bash
+     npm install @nestjs/config
+     ```
+   * In `app.module.ts`, import `ConfigModule.forRoot()`.
+
+3. **Add Prisma & initialize**
+
+   ```bash
+   npm install prisma @prisma/client
+   npx prisma init
+   ```
+
+   * In `prisma/schema.prisma`, set:
+
+     ```prisma
+     datasource db {
+       provider = "postgresql"
+       url      = env("DATABASE_URL")
+     }
+     generator client {
+       provider = "prisma-client-js"
+     }
+     ```
+
+4. **Define your data model**
+   In `prisma/schema.prisma`, beneath the datasource block:
+
+   ```prisma
+   model Image {
+     id        Int       @id @default(autoincrement())
+     filename  String
+     url       String
+     createdAt DateTime  @default(now())
+     likes     Int       @default(0)
+     comments  Comment[]
+   }
+
+   model Comment {
+     id        Int      @id @default(autoincrement())
+     imageId   Int
+     text      String
+     createdAt DateTime @default(now())
+     image     Image    @relation(fields: [imageId], references: [id])
+   }
+   ```
+
+5. **Run migration & generate client**
+
+   ```bash
+   npx prisma migrate dev --name init
+   npx prisma generate
+   ```
+
+6. **Create a PrismaService wrapper**
+
+   ```bash
+   nest g module prisma
+   nest g service prisma
+   ```
+
+   ```ts
+   // src/prisma/prisma.service.ts
+   import { Injectable, OnModuleInit } from '@nestjs/common';
+   import { PrismaClient } from '@prisma/client';
+
+   @Injectable()
+   export class PrismaService extends PrismaClient implements OnModuleInit {
+     async onModuleInit() {
+       await this.$connect();
+     }
+   }
+   ```
+
+7. **Generate Image module, service, controller**
+
+   ```bash
+   nest g module image
+   nest g service image
+   nest g controller image
+   ```
+
+8. **Implement ImageService**
+
+   ```ts
+   // src/image/image.service.ts
+   import { Injectable } from '@nestjs/common';
+   import { PrismaService } from '../prisma/prisma.service';
+
+   @Injectable()
+   export class ImageService {
+     constructor(private prisma: PrismaService) {}
+
+     create(data: { filename: string; url: string }) {
+       return this.prisma.image.create({ data });
+     }
+
+     findAll() {
+       return this.prisma.image.findMany({ include: { comments: true } });
+     }
+
+     like(id: number) {
+       return this.prisma.image.update({
+         where: { id },
+         data: { likes: { increment: 1 } },
+       });
+     }
+
+     comment(imageId: number, text: string) {
+       return this.prisma.comment.create({
+         data: { imageId, text },
+       });
+     }
+   }
+   ```
+
+9. **Implement ImageController with Multer**
+
+   ```bash
+   npm install @nestjs/platform-express multer
+   ```
+
+   ```ts
+   // src/image/image.controller.ts
+   import {
+     Controller, Post, Get, Param,
+     Body, UploadedFile, UseInterceptors
+   } from '@nestjs/common';
+   import { FileInterceptor } from '@nestjs/platform-express';
+   import { ImageService } from './image.service';
+
+   @Controller('images')
+   export class ImageController {
+     constructor(private svc: ImageService) {}
+
+     @Post('upload')
+     @UseInterceptors(FileInterceptor('file', { dest: './uploads' }))
+     upload(@UploadedFile() file: Express.Multer.File) {
+       return this.svc.create({
+         filename: file.originalname,
+         url: `/uploads/${file.filename}`,
+       });
+     }
+
+     @Get()
+     all() {
+       return this.svc.findAll();
+     }
+
+     @Post(':id/like')
+     like(@Param('id') id: string) {
+       return this.svc.like(Number(id));
+     }
+
+     @Post(':id/comment')
+     comment(
+       @Param('id') id: string,
+       @Body('text') text: string
+     ) {
+       return this.svc.comment(Number(id), text);
+     }
+   }
+   ```
+
+10. **Serve static files**
+    In `main.ts`:
+
+    ```ts
+    import { join } from 'path';
+    app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+      prefix: '/uploads/',
+    });
+    ```
+
+11. **Test with Postman**
+
+    * `POST /images/upload` with form-data `file` → confirm response.
+    * `GET /images` → you should see your records.
+    * `POST /images/1/like` and `/1/comment` → verify DB updates.
+
+---
+
+### 🌐 **Frontend Setup (React + MUI + Axios)**
+
+12. **Scaffold React app**
+
+    ```bash
+    npx create-react-app frontend --template typescript
+    cd frontend
+    ```
+
+13. **Install dependencies**
+
+    ```bash
+    npm install @mui/material @mui/icons-material axios react-router-dom
+    ```
+
+14. **Add routing**
+
+    ```tsx
+    // src/App.tsx
+    import { BrowserRouter, Routes, Route } from 'react-router-dom';
+    import UploadPage from './pages/UploadPage';
+    import GalleryPage from './pages/GalleryPage';
+
+    export default function App() {
+      return (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<GalleryPage />} />
+            <Route path="upload" element={<UploadPage />} />
+          </Routes>
+        </BrowserRouter>
+      );
+    }
+    ```
+
+15. **Build the upload form**
+
+    ```tsx
+    // src/pages/UploadPage.tsx
+    import { useState } from 'react';
+    import { Button, TextField, Box } from '@mui/material';
+    import axios from 'axios';
+
+    export default function UploadPage() {
+      const [file, setFile] = useState<File | null>(null);
+      const [preview, setPreview] = useState<string>('');
+
+      const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const f = e.target.files?.[0] ?? null;
+        setFile(f);
+        if (f) setPreview(URL.createObjectURL(f));
+      };
+
+      const onUpload = async () => {
+        if (!file) return;
+        const form = new FormData();
+        form.append('file', file);
+        await axios.post('/api/images/upload', form, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        alert('Done');
+      };
+
+      return (
+        <Box>
+          <TextField type="file" onChange={onChange} />
+          {preview && <img src={preview} alt="preview" width={200} />}
+          <Button onClick={onUpload}>Upload</Button>
+        </Box>
+      );
+    }
+    ```
+
+16. **Build the gallery**
+
+    ```tsx
+    // src/pages/GalleryPage.tsx
+    import { useEffect, useState } from 'react';
+    import axios from 'axios';
+    import {
+      Card, CardMedia, CardActions,
+      IconButton, TextField, Box
+    } from '@mui/material';
+    import FavoriteIcon from '@mui/icons-material/Favorite';
+
+    type Comment = { text: string };
+    type Image = { id: number; url: string; likes: number; comments: Comment[] };
+
+    export default function GalleryPage() {
+      const [images, setImages] = useState<Image[]>([]);
+      const [newComment, setNewComment] = useState<{[key:number]:string}>({});
+
+      useEffect(() => {
+        axios.get('/api/images').then(r => setImages(r.data));
+      }, []);
+
+      const like = async (id: number) => {
+        await axios.post(`/api/images/${id}/like`);
+        setImages(imgs =>
+          imgs.map(i => i.id === id ? { ...i, likes: i.likes + 1 } : i)
+        );
+      };
+
+      const comment = async (id: number) => {
+        const text = newComment[id];
+        if (!text) return;
+        await axios.post(`/api/images/${id}/comment`, { text });
+        setImages(imgs =>
+          imgs.map(i =>
+            i.id === id ? { ...i, comments: [...i.comments, { text }] } : i
+          )
+        );
+        setNewComment({ ...newComment, [id]: '' });
+      };
+
+      return (
+        <Box display="grid" gridTemplateColumns="repeat(3,1fr)" gap={2}>
+          {images.map(i => (
+            <Card key={i.id}>
+              <CardMedia component="img" image={i.url} />
+              <CardActions>
+                <IconButton onClick={() => like(i.id)}>
+                  <FavoriteIcon /> {i.likes}
+                </IconButton>
+              </CardActions>
+              <Box p={1}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Comment…"
+                  value={newComment[i.id] || ''}
+                  onChange={e =>
+                    setNewComment({ ...newComment, [i.id]: e.target.value })
+                  }
+                />
+                <Button onClick={() => comment(i.id)}>Post</Button>
+              </Box>
+            </Card>
+          ))}
+        </Box>
+      );
+    }
+    ```
+
+17. **Configure proxy**
+    In `frontend/package.json`, add:
+
+    ```json
+    "proxy": "http://localhost:3000"
+    ```
+
+18. **Run both servers**
+
+    * In `backend/`: `npm run start:dev`
+    * In `frontend/`: `npm start`
+
+19. **Verify end-to-end**
+
+    * Upload an image → appears in gallery
+    * Like & comment → counts update immediately
+
+---
+
+### ✅ **Polish & Explain**
+
+1. **Comments & Types**
+
+   * Above each function/component, add a brief comment.
+   * Use TypeScript interfaces (`type Image = …`) so you can point to them in your walkthrough.
+
+2. **README**
+
+   * List setup steps, endpoints, and how to run.
+   * Include snippets:
+
+     ```bash
+     # Backend
+     npm install
+     npx prisma migrate dev
+     npm run start:dev
+
+     # Frontend
+     npm install
+     npm start
+     ```
+
+3. **Swagger** (optional)
+
+   ```bash
+   npm install @nestjs/swagger swagger-ui-express
+   ```
+
+   * Enable in `main.ts`:
+
+     ```ts
+     const options = new DocumentBuilder()
+       .setTitle('Image API')
+       .build();
+     const doc = SwaggerModule.createDocument(app, options);
+     SwaggerModule.setup('api/docs', app, doc);
+     ```
+
+4. **Prepare your verbal flow**
+
+   * **“Here’s the Prisma schema…”** (show `schema.prisma`)
+   * **“This NestJS controller…”** (walk through one endpoint decorator + handler)
+   * **“On the frontend…”** (explain the hook, the handler, the Axios call)
+
+By following these steps in order, you’ll build the app quickly—and know exactly how to explain each piece in your interview. Good luck!
