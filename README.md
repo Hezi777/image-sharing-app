@@ -1,4 +1,4 @@
-# IMAGE-SHARING-APP
+<h1 align="center">IMAGE-SHARING-APP</h1>
 
 <p align="center"><strong>Built with the tools and technologies:</strong></p>
 
