@@ -1,5 +1,22 @@
 # IMAGE-SHARING-APP
 
+<p align="center"><strong>Built with the tools and technologies:</strong></p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/JSON-black?logo=json&logoColor=white" />
+  <img src="https://img.shields.io/badge/Markdown-black?logo=markdown&logoColor=white" />
+  <img src="https://img.shields.io/badge/npm-red?logo=npm&logoColor=white" />
+  <img src="https://img.shields.io/badge/Prettier-yellow?logo=prettier&logoColor=black" />
+  <img src="https://img.shields.io/badge/JavaScript-yellow?logo=javascript&logoColor=black" />
+  <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/tsnode-informational?logo=ts-node" />
+  <img src="https://img.shields.io/badge/Prisma-2D3748?logo=prisma" />
+  <img src="https://img.shields.io/badge/ESLint-4B32C3?logo=eslint" />
+  <img src="https://img.shields.io/badge/Axios-5A29E4?logo=axios" />
+  <img src="https://img.shields.io/badge/Jest-C21325?logo=jest" />
+</p>
+
 ---
 
 ## Table of Contents
