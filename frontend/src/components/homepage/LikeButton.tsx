@@ -9,10 +9,18 @@ type Props = {
 
 export default function LikeButton({ isLiked, likeCount, onLike }: Props) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
       <IconButton 
         onClick={onLike} 
-        sx={{ p: 0.5 }} 
+        sx={{
+          p: 0,
+          m: 0,
+          minWidth: 0,
+          width: 24,
+          height: 24,
+          ml: 0,
+          mr: 0,
+        }}
         color={isLiked ? "error" : "default"}
       >
         {isLiked ? 
@@ -20,8 +28,8 @@ export default function LikeButton({ isLiked, likeCount, onLike }: Props) {
           <FavoriteBorder sx={{ fontSize: 24 }} />
         }
       </IconButton>
-      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, fontSize: '14px' }}>
-        {likeCount} likes
+      <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '14px' }}>
+        {likeCount} {likeCount === 1 ? 'like' : 'likes'}
       </Typography>
     </Box>
   );

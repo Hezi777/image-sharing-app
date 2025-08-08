@@ -18,9 +18,12 @@ model Image {
   filename     String
   originalName String?
   url          String
+  description  String?
   createdAt    DateTime  @default(now())
   likes        Int       @default(0)
+  uploaderId   Int
   comments     Comment[]
+  uploader     User       @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
 }
 
 model Comment {
@@ -28,5 +31,16 @@ model Comment {
   imageId   Int
   text      String
   createdAt DateTime @default(now())
-  image     Image    @relation(fields: [imageId], references: [id])
+  userId    Int
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  username String    @unique
+  password String
+  createdAt DateTime @default(now())
+  images   Image[]
+  comments Comment[]
 }

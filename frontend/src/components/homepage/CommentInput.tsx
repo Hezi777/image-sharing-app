@@ -1,12 +1,28 @@
-import { Box, Button, TextField } from '@mui/material';
+import { Box, Button, TextField, Typography } from '@mui/material';
 
+// Type definition for the props of CommentInput component
 type Props = {
   value: string;
   onChange: (text: string) => void;
   onSubmit: () => void;
+  isAuthenticated?: boolean;
 };
 
-export default function CommentInput({ value, onChange, onSubmit }: Props) {
+export default function CommentInput({ value, onChange, onSubmit, isAuthenticated = true }: Props) {
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography 
+          variant="body2" 
+          color="textSecondary" 
+          sx={{ textAlign: 'center', fontStyle: 'italic' }}
+        >
+          Log in to add a comment
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

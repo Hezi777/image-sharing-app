@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 import ImageIcon from '@mui/icons-material/Image';
 import { useRef } from 'react';
 import UploadButton from './UploadButton';
@@ -12,6 +12,7 @@ type Props = {
 };
 
 export default function DropZone({ onFileSelect, file, uploading, onSelectFile, onUpload }: Props) {
+  const theme = useTheme();
   const dropRef = useRef<HTMLDivElement>(null);
 
   const handleFile = (f: File) => {
@@ -48,11 +49,15 @@ export default function DropZone({ onFileSelect, file, uploading, onSelectFile, 
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       sx={{
-        border: '3px dashed #e0e0e0',
+        border: `3px dashed ${theme.palette.divider}`,
         borderRadius: 2,
         p: 5,
-        background: '#fafafa',
+        background: theme.palette.background.default,
         transition: 'all 0.3s ease',
+        '&.dragover': {
+          borderColor: theme.palette.primary.main,
+          background: theme.palette.action.hover,
+        },
       }}
     >
       <Box
@@ -60,7 +65,9 @@ export default function DropZone({ onFileSelect, file, uploading, onSelectFile, 
           width: 72,
           height: 72,
           borderRadius: '50%',
-          background: 'linear-gradient(45deg, #e0ecff, #f5f7fa)',
+          background: theme.palette.mode === 'dark' 
+            ? 'linear-gradient(45deg, #1e3a8a, #1e40af)' 
+            : 'linear-gradient(45deg, #e0ecff, #f5f7fa)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -68,10 +75,14 @@ export default function DropZone({ onFileSelect, file, uploading, onSelectFile, 
           mb: 3,
         }}
       >
-        <ImageIcon sx={{ fontSize: 36, color: '#1976d2' }} />
+        <ImageIcon sx={{ fontSize: 36, color: theme.palette.primary.main }} />
       </Box>
-             <Typography variant="h6">Drop your image here or click to browse</Typography>
-       <Typography variant="body2">Supports JPG, PNG, GIF up to 10MB</Typography>
+             <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
+               Drop your image here or click to browse
+             </Typography>
+       <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+         Supports JPG, PNG, GIF up to 10MB
+       </Typography>
 
        <UploadButton
          file={file}

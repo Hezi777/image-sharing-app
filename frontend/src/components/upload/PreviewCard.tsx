@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 
 type Props = {
   preview: string;
@@ -6,6 +6,8 @@ type Props = {
 };
 
 export default function PreviewCard({ preview, file }: Props) {
+  const theme = useTheme();
+  
   if (!preview || !file) return null;
 
   return (
@@ -17,7 +19,7 @@ export default function PreviewCard({ preview, file }: Props) {
         borderRadius: 2,
         boxShadow: 3,
         overflow: 'hidden',
-        bgcolor: 'white',
+        background: theme.palette.background.paper,
       }}
     >
       <Box
@@ -35,7 +37,7 @@ export default function PreviewCard({ preview, file }: Props) {
         <Typography
           variant="body2"
           noWrap
-          sx={{ fontWeight: 500 }}
+          sx={{ fontWeight: 500, color: theme.palette.text.primary }}
           title={file.name}
         >
           {file.name}
