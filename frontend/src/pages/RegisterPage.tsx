@@ -1,3 +1,6 @@
+// RegisterPage - user registration form with password confirmation validation
+// Uses fetch API for registration and automatically logs in user on success
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -24,6 +27,7 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Handle registration form - validates passwords match and creates new account
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 

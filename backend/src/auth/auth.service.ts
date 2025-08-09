@@ -1,3 +1,6 @@
+// Authentication service - handles user registration, login, and profile updates
+// Uses bcrypt for password hashing and JWT tokens for session management
+
 import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,8 +13,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  // Register new user - checks username availability, hashes password, creates user record
   async register(username: string, password: string) {
-    // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
       where: { username },
     });
@@ -20,10 +23,7 @@ export class AuthService {
       throw new ConflictException('Username already exists');
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
     const user = await this.prisma.user.create({
       data: {
         username,
@@ -31,7 +31,6 @@ export class AuthService {
       },
     });
 
-    // Generate JWT token
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -39,8 +38,8 @@ export class AuthService {
     };
   }
 
+  // Login user - verifies credentials using bcrypt and returns JWT token
   async login(username: string, password: string) {
-    // Find user
     const user = await this.prisma.user.findUnique({
       where: { username },
     });
@@ -49,13 +48,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Generate JWT token
     const payload = { username: user.username, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -63,8 +60,8 @@ export class AuthService {
     };
   }
 
+  // Update user profile - allows username changes with duplicate checking
   async updateProfile(userId: number, newUsername: string) {
-    // Check if user exists
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -73,7 +70,6 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if new username is already taken by another user
     if (newUsername !== user.username) {
       const existingUser = await this.prisma.user.findUnique({
         where: { username: newUsername },
@@ -84,7 +80,6 @@ export class AuthService {
       }
     }
 
-    // Update user
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: { username: newUsername },

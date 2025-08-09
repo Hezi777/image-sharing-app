@@ -1,3 +1,6 @@
+// LoginPage - user authentication form with Material-UI styling
+// Uses React hooks for form state and axios for API calls to backend auth endpoint
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from '../config/api';
@@ -25,6 +28,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Handle form submission - calls backend auth API and updates auth context
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

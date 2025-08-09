@@ -1,3 +1,6 @@
+// ImageCard component - displays individual image with interactions (like, comment, delete)
+// Uses Material-UI components for styling and shows owner controls conditionally
+
 import {
     Avatar,
     Box,

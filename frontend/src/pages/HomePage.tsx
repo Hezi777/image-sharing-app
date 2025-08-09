@@ -1,3 +1,6 @@
+// HomePage - main image gallery with infinite scroll, search, and interactions
+// Uses React hooks for state management and axios for API calls
+
 import {
   Box,
   Container,
@@ -17,7 +20,6 @@ import LoadingState from '../components/homepage/LoadingState';
 import { useAuth } from '../components/providers/AuthProvider';
 import { useSearch } from '../components/providers/SearchProvider';
 
-// Type definitions for image and comment
 type Comment = {
   text: string;
   createdAt?: string;
@@ -52,7 +54,7 @@ export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
   const { showSearch, setShowSearch } = useSearch();
 
-  // Fetch images with pagination support
+  // Fetch images from API with pagination and search - handles both initial load and infinite scroll
   const fetchImages = async (page: number = 1, isLoadMore: boolean = false) => {
     if (isLoadMore) {
       setLoadingMore(true);
@@ -90,7 +92,7 @@ export default function HomePage() {
     }
   };
 
-  // Load more images for infinite scroll
+  // Trigger loading more images when user scrolls near bottom
   const loadMoreImages = () => {
     if (!loadingMore && hasNextPage) {
       fetchImages(currentPage + 1, true);

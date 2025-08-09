@@ -1,3 +1,6 @@
+// Custom hook for syncing React state with localStorage
+// Automatically saves state changes to localStorage and restores on page reload
+
 import { useEffect, useState } from 'react';
 
 export function useLocalStorage<T>(key: string, initial: T) {

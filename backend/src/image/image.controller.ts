@@ -1,5 +1,5 @@
-// Image controller that handles all image-related HTTP requests
-// Provides endpoints for uploading, retrieving, liking, and commenting on images
+// Image controller - handles file uploads and image interactions (like, comment, delete)
+// Uses Multer for file uploads and JWT guards to protect authenticated endpoints
 
 import {
   Controller,
@@ -21,17 +21,16 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { randomUUID } from 'crypto';
 
-// Main controller for image-related endpoints: upload, list, like, comment
 @Controller('images')
 export class ImageController {
   constructor(private readonly svc: ImageService) {}
 
-  // Upload image: receives a file, stores it locally, creates DB record
+  // POST /images/upload - handles file upload with Multer, stores to disk and saves metadata
   @Post('upload')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './uploads', // Store files in uploads directory
+      destination: './uploads',
       filename: (req, file, cb) => {
         const filename = `${randomUUID()}${extname(file.originalname).toLowerCase()}`;
         cb(null, filename);
@@ -41,38 +40,37 @@ export class ImageController {
       const allowed = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
       cb(null, allowed.has(file.mimetype));
     },
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }
   }))
   upload(
     @UploadedFile() file: Express.Multer.File,
     @Body('description') description?: string,
     @Request() req?: any,
   ) {
-    // Create image record in database with file information
     return this.svc.create({
-      filename: file.filename, // Generated unique filename
-      originalName: file.originalname, // Original file name
-      url: `/uploads/${file.filename}`, // Public URL for accessing the file
+      filename: file.filename,
+      originalName: file.originalname,
+      url: `/uploads/${file.filename}`,
       description,
       uploaderId: req.user.userId,
     });
   }
 
-  // Like an image by ID
+  // POST /images/:id/like - increment like count for image
   @Post(':id/like')
   @UseGuards(JwtAuthGuard)
   like(@Param('id') id: string) {
     return this.svc.like(Number(id));
   }
 
-  // Unlike an image by ID
+  // DELETE /images/:id/like - decrement like count for image
   @Delete(':id/like')
   @UseGuards(JwtAuthGuard)
   unlike(@Param('id') id: string) {
     return this.svc.unlike(Number(id));
   }
 
-  // Comment on an image by ID
+  // POST /images/:id/comment - add comment to image
   @Post(':id/comment')
   @UseGuards(JwtAuthGuard)
   comment(
@@ -83,14 +81,14 @@ export class ImageController {
     return this.svc.comment(Number(id), text, req.user.userId);
   }
 
-  // Delete an image by ID
+  // DELETE /images/:id - remove image and its file
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   delete(@Param('id') id: string) {
     return this.svc.delete(Number(id));
   }
 
-  // Fetch all images (with comments, likes, etc.)
+  // GET /images - fetch paginated images with optional search
   @Get()
   all(
     @Query('search') search?: string,

@@ -1,3 +1,6 @@
+// Theme provider - manages dark/light mode toggle using Material-UI theming
+// Creates custom theme with Instagram-like colors and provides theme context
+
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 
@@ -7,6 +10,8 @@ interface ThemeModeContextType {
 }
 
 const ThemeModeContext = createContext<ThemeModeContextType | undefined>(undefined);
+
+// Custom hook to access theme mode context
 export const useThemeMode = () => {
   const ctx = useContext(ThemeModeContext);
   if (!ctx) throw new Error('useThemeMode must be used within <ThemeModeProvider>');
@@ -16,6 +21,7 @@ export const useThemeMode = () => {
 export const ThemeModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [darkMode, setDarkMode] = useState(false);
 
+  // Create Material-UI theme with custom colors and dark/light mode support
   const theme = useMemo(() => createTheme({
     palette: {
       mode: darkMode ? 'dark' : 'light',

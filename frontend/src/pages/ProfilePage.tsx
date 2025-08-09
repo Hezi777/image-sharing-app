@@ -1,3 +1,6 @@
+// ProfilePage - user profile with image grid, stats, and inline username editing
+// Displays user's uploaded images in Instagram-style grid layout with edit functionality
+
 import {
   Box,
   Container,
@@ -19,7 +22,6 @@ import { useAuth } from '../components/providers/AuthProvider';
 import LoadingState from '../components/homepage/LoadingState';
 import GalleryHeader from '../components/homepage/GalleryHeader';
 
-// Type definitions for image and comment
 type Comment = {
   text: string;
   createdAt?: string;
@@ -95,8 +97,6 @@ export default function ProfilePage() {
     setSavingName(true);
     setSaveError(null);
     try {
-      // Adjust this endpoint to your backend. Common options:
-      // PATCH /auth/me   or   PATCH /users/me   or   PATCH /users/:id
       const { data } = await axios.patch('/auth/me', {
         username: nameInput.trim(),
       });

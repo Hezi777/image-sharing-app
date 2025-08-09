@@ -1,3 +1,6 @@
+// Auth provider - manages user authentication state using React Context
+// Handles login/logout, persists auth to localStorage, and sets axios headers
+
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 
@@ -16,6 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Custom hook to access auth context - must be used within AuthProvider
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
@@ -26,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<UserShape | null>(null);
 
-  // Restore auth from localStorage once
+  // Restore authentication from localStorage on app startup
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
@@ -37,6 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Store auth data and set axios header for API requests
   const login = (token: string, userData: UserShape) => {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
@@ -45,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   };
 
+  // Clear auth data and remove axios header
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

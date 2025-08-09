@@ -1,27 +1,21 @@
-// Main application entry point for the NestJS backend server
-// This file bootstraps the application and configures essential middleware
+// NestJS backend server entry point - starts the image sharing API server
+// Uses Express platform because we need file upload handling with Multer
 
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { join } from 'path';
 
-// Bootstrap function that initializes and starts the NestJS application
-// Configures static file serving and starts the HTTP server
+// Bootstrap function - initializes NestJS app and configures file serving
 async function bootstrap() {
-  // Create a new NestJS application instance with Express platform
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // Configure static file serving for uploaded images
-  // This allows the frontend to access uploaded files via /uploads/ URL path
+  // Serve uploaded images as static files so frontend can display them
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/', // URL prefix for accessing static files
+    prefix: '/uploads/',
   });
 
-  // Start the HTTP server on the specified port (default: 3001)
-  // Uses environment variable PORT if available, otherwise defaults to 3001
   await app.listen(process.env.PORT ?? 3001);
 }
 
-// Start the application
 bootstrap();

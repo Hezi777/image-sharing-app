@@ -1,3 +1,6 @@
+// Search provider - manages search UI visibility state using React Context
+// Controls when the search input overlay appears/disappears in the app
+
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
 interface SearchContextType {
@@ -7,6 +10,7 @@ interface SearchContextType {
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
+// Custom hook to access search context
 export const useSearch = () => {
   const ctx = useContext(SearchContext);
   if (!ctx) throw new Error('useSearch must be used within <SearchProvider>');

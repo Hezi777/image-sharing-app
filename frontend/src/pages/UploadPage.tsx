@@ -1,3 +1,6 @@
+// UploadPage - image upload interface with drag-and-drop and preview functionality
+// Uses FormData and axios to send multipart form data to backend upload endpoint
+
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
@@ -22,6 +25,7 @@ export default function UploadPage() {
   const [description, setDescription] = useState('');
   const [user, setUser] = useState<any>(null);
 
+  // Load user data from localStorage to show who's uploading
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -29,15 +33,18 @@ export default function UploadPage() {
     }
   }, []);
 
+  // Handle file selection and create preview URL using browser's URL.createObjectURL
   const handleFileSelect = (f: File) => {
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
 
+  // Trigger hidden file input click for file selection
   const handleSelectFile = () => {
     document.getElementById('file-input')?.click();
   };
 
+  // Upload image using FormData - required for file uploads with multipart/form-data
   const uploadImage = async () => {
     if (!file) return;
 

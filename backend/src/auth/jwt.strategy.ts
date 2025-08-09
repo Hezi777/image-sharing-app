@@ -1,3 +1,6 @@
+// JWT strategy - configures Passport to validate JWT tokens from Authorization header
+// Used by JwtAuthGuard to protect routes that require authentication
+
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -12,6 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  // Extract user info from JWT payload - called automatically by Passport
   async validate(payload: any) {
     return { userId: payload.sub, username: payload.username };
   }
