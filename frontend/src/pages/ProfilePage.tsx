@@ -12,7 +12,7 @@ import {
 import { GridOn as GridIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../App';
+import { useAuth } from '../components/providers/AuthProvider';
 import LoadingState from '../components/homepage/LoadingState';
 import GalleryHeader from '../components/homepage/GalleryHeader';
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   Box,
   Container,
@@ -11,7 +10,7 @@ import {
   Link,
   useTheme,
 } from '@mui/material';
-import { useAuth } from '../App';
+import { useAuth } from '../components/providers/AuthProvider';
 import GalleryHeader from '../components/homepage/GalleryHeader';
 
 export default function RegisterPage() {
@@ -46,7 +45,7 @@ export default function RegisterPage() {
 
       if (response.ok) {
         login(data.token, data.user);
-        navigate('/');              // redirect after successful signup
+        navigate('/');
       } else {
         setError(data.message || 'Registration failed');
       }
@@ -62,83 +61,91 @@ export default function RegisterPage() {
       sx={{
         minHeight: '100vh',
         background: theme.palette.background.default,
-        display: 'flex',
-        flexDirection: 'column',    // stack header + form area
+        py: 2,
+        userSelect: 'none',
       }}
     >
-      {/* Top-centered, large header */}
-      <GalleryHeader centered />
+      <Container maxWidth="sm" sx={{ pb: 8 }}>
+        <GalleryHeader centered />
 
-      {/* Center the form in the remaining space */}
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: 2,
-        }}
-      >
-        <Container maxWidth="sm">
-          <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-            <Typography component="h1" variant="h4" align="center" gutterBottom>
-              Register
-            </Typography>
+        <Paper
+          elevation={3}
+          sx={{
+            borderRadius: 3,
+            p: 4,
+            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            border: `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Typography
+            component="h1"
+            variant="h4"
+            align="center"
+            gutterBottom
+            sx={{
+              background: 'linear-gradient(45deg, #0575E6, #021B79)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              fontWeight: 700,
+            }}
+          >
+            Register
+          </Typography>
 
-            <Box component="form" onSubmit={handleRegister} sx={{ mt: 2 }}>
-              <TextField
-                fullWidth
-                required
-                label="Username"
-                margin="normal"
-                autoFocus
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-              />
-              <TextField
-                fullWidth
-                required
-                label="Password"
-                type="password"
-                margin="normal"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-              />
-              <TextField
-                fullWidth
-                required
-                label="Confirm Password"
-                type="password"
-                margin="normal"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-              />
+          <Box component="form" onSubmit={handleRegister} sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              required
+              label="Username"
+              margin="normal"
+              autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              required
+              label="Password"
+              type="password"
+              margin="normal"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <TextField
+              fullWidth
+              required
+              label="Confirm Password"
+              type="password"
+              margin="normal"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
 
-              {error && (
-                <Typography color="error" align="center" sx={{ mt: 1 }}>
-                  {error}
-                </Typography>
-              )}
+            {error && (
+              <Typography color="error" align="center" sx={{ mt: 1 }}>
+                {error}
+              </Typography>
+            )}
 
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 1 }}
-                disabled={loading}
-              >
-                {loading ? 'Creating account…' : 'Register'}
-              </Button>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 1 }}
+              disabled={loading}
+            >
+              {loading ? 'Creating account…' : 'Register'}
+            </Button>
 
-              <Box textAlign="center">
-                <Link href="/login" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Box>
+            <Box textAlign="center">
+              <Link href="/login" variant="body2">
+                Already have an account? Sign in
+              </Link>
             </Box>
-          </Paper>
-        </Container>
-      </Box>
+          </Box>
+        </Paper>
+      </Container>
     </Box>
   );
 }
