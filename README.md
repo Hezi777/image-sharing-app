@@ -34,6 +34,33 @@
 - 🔌 **REST API** — structured and documented for easy integration  
 
 ---
+## 📸 Screenshots
+
+Below are some highlights of Lumia in action.  
+*(Demo content generated with sample travel and lifestyle images for presentation purposes.)*
+
+| Home (Infinite Scroll) | Image Upload |
+|------------------------|--------------|
+| ![Home Gallery](assets/screenshots/home.gif) | ![Upload Page](assets/screenshots/upload.png) |
+
+| Login Page | Registration Page |
+|------------|-------------------|
+| ![Login](assets/screenshots/login.png) | ![Register](assets/screenshots/register.png) |
+
+| Profile Page | Dark Mode |
+|--------------|-----------|
+| ![Profile](assets/screenshots/profile.png) | ![Dark Mode](assets/screenshots/darkmode.png) |
+
+---
+
+### **Screenshot Details**
+1. **Home (Infinite Scroll)** — GIF showing images loading dynamically as the user scrolls.  
+2. **Image Upload** — Drag & drop upload with preview, description field, and file validation.  
+3. **Login & Registration** — Clean, Material-UI based authentication screens.  
+4. **Profile Page** — Personal gallery grid, post stats, and inline username editing.  
+5. **Dark Mode** — Persistent theme toggle with glassmorphism UI.
+
+---
 
 ## 🛠 Tech Stack
 
