@@ -8,6 +8,8 @@ import {
   CardMedia,
   useTheme,
   Divider,
+  TextField,
+  Stack,
 } from '@mui/material';
 import { GridOn as GridIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
@@ -17,8 +19,8 @@ import LoadingState from '../components/homepage/LoadingState';
 import GalleryHeader from '../components/homepage/GalleryHeader';
 
 // Type definitions for image and comment
-type Comment = { 
-  text: string; 
+type Comment = {
+  text: string;
   createdAt?: string;
   user: { id: number; username: string };
 };
@@ -41,12 +43,20 @@ export default function ProfilePage() {
   const [userImages, setUserImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // inline edit state
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(user?.username ?? '');
+  const [savingName, setSavingName] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchUserImages = async () => {
       setLoading(true);
       try {
         const res = await axios.get<Image[]>('/images');
-        const filteredImages = res.data.filter(img => img.uploader.id === user?.id);
+        const filteredImages = res.data.filter(
+          (img) => img.uploader.id === user?.id
+        );
         setUserImages(filteredImages);
       } catch (err) {
         console.error('Failed to fetch user images', err);
@@ -57,6 +67,7 @@ export default function ProfilePage() {
 
     if (user) {
       fetchUserImages();
+      setNameInput(user.username); // ensure input is in sync when user loads
     }
   }, [user]);
 
@@ -65,6 +76,43 @@ export default function ProfilePage() {
   };
 
   const totalLikes = userImages.reduce((sum, img) => sum + img.likes, 0);
+
+  const startEditName = () => {
+    setSaveError(null);
+    setNameInput(user?.username ?? '');
+    setEditingName(true);
+  };
+
+  const cancelEditName = () => {
+    setSaveError(null);
+    setEditingName(false);
+    setNameInput(user?.username ?? '');
+  };
+
+  const saveName = async () => {
+    if (!nameInput.trim() || !user) return;
+    setSavingName(true);
+    setSaveError(null);
+    try {
+      // Adjust this endpoint to your backend. Common options:
+      // PATCH /auth/me   or   PATCH /users/me   or   PATCH /users/:id
+      const { data } = await axios.patch('/auth/me', {
+        username: nameInput.trim(),
+      });
+
+      // Persist locally so the change reflects across the app
+      const updatedUser = { ...user, username: data?.username ?? nameInput.trim() };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+
+      // Easiest way without changing AuthProvider: reload to rehydrate context
+      window.location.reload();
+    } catch (err: any) {
+      setSaveError(
+        err?.response?.data?.message || 'Could not save name. Please try again.'
+      );
+      setSavingName(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -79,11 +127,13 @@ export default function ProfilePage() {
   }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: theme.palette.background.default,
-      userSelect: 'none',
-    }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: theme.palette.background.default,
+        userSelect: 'none',
+      }}
+    >
       <GalleryHeader />
       <Container maxWidth="md">
         {/* Profile Header */}
@@ -91,26 +141,80 @@ export default function ProfilePage() {
           {/* Profile Picture and Stats Row */}
           <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 4 }}>
             {/* Profile Picture */}
-            <Avatar 
-              sx={{ 
-                width: 120, 
-                height: 120, 
-                bgcolor: '#0095f6', 
-                fontSize: '48px', 
+            <Avatar
+              sx={{
+                width: 120,
+                height: 120,
+                bgcolor: '#0095f6',
+                fontSize: '48px',
                 fontWeight: 600,
                 mr: 4,
                 flexShrink: 0,
               }}
             >
-              {user.username.charAt(0).toUpperCase()}
+              {(editingName ? nameInput : user.username).charAt(0).toUpperCase()}
             </Avatar>
-            
+
             {/* Stats and Info */}
             <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-              {/* Username */}
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: 400 }}>
-                {user.username}
-              </Typography>
+              {/* Username + inline editor */}
+              {!editingName ? (
+                <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 400 }}>
+                    {user.username}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={startEditName}
+                    sx={{ textTransform: 'none', borderRadius: 2 }}
+                  >
+                    Edit profile
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleLogout}
+                    size="small"
+                    sx={{ textTransform: 'none', borderRadius: 2 }}
+                  >
+                    Logout
+                  </Button>
+                </Stack>
+              ) : (
+                <Stack spacing={1} sx={{ mb: 3, maxWidth: 360 }}>
+                  <TextField
+                    label="Username"
+                    size="small"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    autoFocus
+                  />
+                  {saveError && (
+                    <Typography variant="body2" color="error">
+                      {saveError}
+                    </Typography>
+                  )}
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant="contained"
+                      onClick={saveName}
+                      disabled={savingName || !nameInput.trim()}
+                      sx={{ textTransform: 'none', borderRadius: 2 }}
+                    >
+                      {savingName ? 'Saving…' : 'Save'}
+                    </Button>
+                    <Button
+                      variant="text"
+                      onClick={cancelEditName}
+                      disabled={savingName}
+                      sx={{ textTransform: 'none', borderRadius: 2 }}
+                    >
+                      Cancel
+                    </Button>
+                  </Stack>
+                </Stack>
+              )}
 
               {/* Stats */}
               <Box sx={{ display: 'flex', gap: 6, mb: 3 }}>
@@ -131,38 +235,6 @@ export default function ProfilePage() {
                   </Typography>
                 </Box>
               </Box>
-
-              {/* Action Buttons */}
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant="outlined"
-                  sx={{ 
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    fontSize: '16px',
-                    px: 3,
-                    py: 1,
-                  }}
-                >
-                  Edit profile
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="error"
-                  onClick={handleLogout}
-                  sx={{ 
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    fontSize: '16px',
-                    px: 3,
-                    py: 1,
-                  }}
-                >
-                  Logout
-                </Button>
-              </Box>
             </Box>
           </Box>
         </Box>
@@ -170,16 +242,16 @@ export default function ProfilePage() {
         {/* Navigation Tabs */}
         <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
           <Box sx={{ position: 'relative' }}>
-            <GridIcon 
-              sx={{ 
-                fontSize: 28, 
+            <GridIcon
+              sx={{
+                fontSize: 28,
                 color: theme.palette.text.primary,
                 cursor: 'pointer',
-              }} 
+              }}
             />
             {/* Active indicator line */}
-            <Box 
-              sx={{ 
+            <Box
+              sx={{
                 position: 'absolute',
                 bottom: -8,
                 left: '50%',
@@ -188,7 +260,7 @@ export default function ProfilePage() {
                 height: 2,
                 backgroundColor: theme.palette.text.primary,
                 borderRadius: 1,
-              }} 
+              }}
             />
           </Box>
         </Box>
@@ -210,15 +282,17 @@ export default function ProfilePage() {
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', 
-              gap: 2,
-            }}>
-              {userImages.map(image => (
-                <Card 
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: 2,
+              }}
+            >
+              {userImages.map((image) => (
+                <Card
                   key={image.id}
-                  sx={{ 
+                  sx={{
                     borderRadius: 0,
                     boxShadow: 'none',
                     border: `1px solid ${theme.palette.divider}`,
@@ -228,24 +302,26 @@ export default function ProfilePage() {
                     },
                   }}
                 >
-                  <Box sx={{ 
-                    width: '100%', 
-                    height: 0, 
-                    paddingBottom: '133.33%', 
-                    position: 'relative',
-                    background: theme.palette.background.default,
-                  }}>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 0,
+                      paddingBottom: '133.33%',
+                      position: 'relative',
+                      background: theme.palette.background.default,
+                    }}
+                  >
                     <CardMedia
                       component="img"
                       image={image.url}
                       alt={image.originalName || image.filename}
-                      sx={{ 
-                        position: 'absolute', 
-                        top: 0, 
-                        left: 0, 
-                        width: '100%', 
-                        height: '100%', 
-                        objectFit: 'cover' 
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
                       }}
                     />
                   </Box>
