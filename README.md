@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img width="790" height="790" alt="Lumia Logo" src="https://github.com/user-attachments/assets/cea168b5-247e-46c7-a645-c8a91cef2ef5" />
+  <img width="300" height="300" alt="Lumia Logo" src="https://github.com/user-attachments/assets/cea168b5-247e-46c7-a645-c8a91cef2ef5" />
   <br/>
   <b>Lumia — Image Sharing App</b>
 </h1>
