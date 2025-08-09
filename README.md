@@ -1,194 +1,91 @@
-<h1 align="center">IMAGE-SHARING-APP</h1>
-
-<p align="center"><strong>Built with the tools and technologies:</strong></p>
+<h1 align="center">
+  <img src="./frontend/public/logo.png" alt="Lumia logo" width="100" /><br/>
+  Lumia — Image Sharing App
+</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/JSON-black?logo=json&logoColor=white" />
-  <img src="https://img.shields.io/badge/Markdown-black?logo=markdown&logoColor=white" />
-  <img src="https://img.shields.io/badge/npm-red?logo=npm&logoColor=white" />
-  <img src="https://img.shields.io/badge/Prettier-yellow?logo=prettier&logoColor=black" />
-  <img src="https://img.shields.io/badge/JavaScript-yellow?logo=javascript&logoColor=black" />
-  <img src="https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black" />
-  <img src="https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/tsnode-informational?logo=ts-node" />
-  <img src="https://img.shields.io/badge/Prisma-2D3748?logo=prisma" />
-  <img src="https://img.shields.io/badge/ESLint-4B32C3?logo=eslint" />
-  <img src="https://img.shields.io/badge/Axios-5A29E4?logo=axios" />
-  <img src="https://img.shields.io/badge/Jest-C21325?logo=jest" />
+  A clean, full-stack photo sharing platform inspired by Instagram.<br/>
+  Upload photos, browse a responsive gallery, like & comment in real time.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" />
+  <img src="https://img.shields.io/badge/NestJS-9-E0234E?logo=nestjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma" />
+  <img src="https://img.shields.io/badge/PostgreSQL-14-336791?logo=postgresql" />
+  <img src="https://img.shields.io/badge/Material--UI-007FFF?logo=mui&logoColor=white" />
 </p>
 
 ---
 
-## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Tech Stack](#tech-stack)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-  - [Backend](#backend)
-  - [Frontend](#frontend)
-- [Environment Configuration](#environment-configuration)
-- [Database Setup](#database-setup)
-- [Running the Application](#running-the-application)
-  - [Development](#development)
-  - [Production](#production)
-- [API Documentation](#api-documentation)
-- [Database Schema](#database-schema)
-- [Screenshots](#screenshots)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-## Project Overview
-
-A modern, full-stack image gallery inspired by Instagram, allowing users to upload images, view them in a dynamic feed, like them, and add comments. Built with React and NestJS, the app features real-time updates and an intuitive interface.
-
-Images are stored locally and metadata is managed in a PostgreSQL database using Prisma ORM.
-
----
-
-## Tech Stack
-
-| Layer    | Technology                                                   |
-| -------- | ------------------------------------------------------------ |
-| Frontend | React 19, TypeScript, Material‑UI (MUI), React Router, Axios |
-| Backend  | NestJS 9, TypeScript, Prisma ORM, PostgreSQL, Multer         |
-| Database | PostgreSQL 14 with Prisma migrations                         |
-| Storage  | Local filesystem (`uploads/` folder)                         |
-
----
-
-## Features
-
-- **Image Upload** with drag-and-drop, preview, and validation
-- **Gallery Feed** with image metadata and infinite scroll
-- **Like & Comment** with optimistic UI updates
-- **Responsive Design** via MUI
-- **RESTful API** for interaction with the backend
-- **Local Storage** for images and PostgreSQL for structured metadata
-
----
-
-## Project Structure
-
-```
-root/
-├── backend/        # NestJS server
-│   ├── src/        # Controllers, services, modules
-│   ├── uploads/    # Stored image files
-│   └── prisma/     # Schema & migration files
-├── frontend/       # React application
-│   ├── src/        # Components, pages, hooks, API client
-│   ├── public/     # Static assets and index.html
-└── README.md       # This documentation
-```
-
----
-
-## Prerequisites
-
-- Node.js 16+
-- PostgreSQL 14+
-- Git
-
----
-
-## Installation
-
-### Backend
+## 🚀 Quick Start
 
 ```bash
-cd backend
-npm install
-cp .env.example .env  # or manually create .env
-# configure DATABASE_URL in .env
-npx prisma migrate dev --name init
-npm run start:dev
-```
+# 1. Clone repo
+git clone https://github.com/yourname/lumia.git
+cd lumia
 
-### Frontend
+# 2. Copy environment files
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 
-```bash
-cd frontend
-npm install
-# configure API endpoint in .env
-npm start
-```
+# 3. Install dependencies
+npm install --prefix backend
+npm install --prefix frontend
 
----
+# 4. Setup database
+npm run prisma:migrate:dev --prefix backend
 
-## Environment Configuration
+# 5. Start development
+npm run start:dev --prefix backend
+npm start --prefix frontend
 
-### Backend `.env`
+🖼 Screenshots
+Gallery View	Upload Form
 
-```dotenv
+🛠 Tech Stack
+Layer	Technology
+Frontend	React 19, TypeScript, Material-UI, React Router, Axios
+Backend	NestJS 9, TypeScript, Prisma ORM, Multer
+Database	PostgreSQL 14
+Storage	Local filesystem (uploads/)
+
+📦 Features
+📤 Image Upload — drag-and-drop with preview & validation
+
+🖼 Responsive Gallery — infinite scroll & image metadata
+
+❤️ Likes & Comments — optimistic UI updates
+
+📱 Responsive Design — works on desktop & mobile
+
+🔌 REST API — structured and documented
+
+⚙ Environment Variables
+Backend .env
+env
+Copy
+Edit
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 PORT=3001
-UPLOAD_DIR=./uploads
-```
+UPLOAD_DIR="./uploads"
+CORS_ORIGIN="http://localhost:5173"
+Frontend .env
+env
+Copy
+Edit
+VITE_API_URL="http://localhost:3001"
+📜 API Endpoints
+Method	Endpoint	Description
+POST	/images/upload	Upload a new image
+GET	/images	List images
+POST	/images/:id/like	Like/unlike image
+POST	/images/:id/comment	Add a comment
 
-### Frontend `.env`
-
-```dotenv
-REACT_APP_API_URL=http://localhost:3001/api
-```
-
----
-
-## Database Setup
-
-```bash
-npx prisma generate
-npx prisma migrate deploy
-```
-
----
-
-## Running the Application
-
-### Development
-
-```bash
-# Terminal 1
-cd backend && npm run start:dev
-
-# Terminal 2
-cd frontend && npm start
-```
-
-### Production
-
-```bash
-# Backend
-cd backend
-npm run build
-npm run start:prod
-
-# Frontend
-cd frontend
-npm run build
-serve -s build
-```
-
----
-
-## API Documentation
-
-| Method | Endpoint              | Description                       |
-| ------ | --------------------- | --------------------------------- |
-| POST   | `/images/upload`      | Upload a new image                |
-| GET    | `/images`             | Retrieve all images with comments |
-| POST   | `/images/:id/like`    | Like or unlike an image           |
-| POST   | `/images/:id/comment` | Add a comment to an image         |
-
----
-
-## Database Schema
-
-```prisma
+🗄 Database Schema
+prisma
+Copy
+Edit
 model Image {
   id           Int       @id @default(autoincrement())
   filename     String
@@ -206,31 +103,17 @@ model Comment {
   createdAt  DateTime @default(now())
   image      Image    @relation(fields: [imageId], references: [id])
 }
-```
+🤝 Contributing
+Fork the repo
 
----
+Create your feature branch: git checkout -b feature/your-feature
 
-## Screenshots
+Commit changes: git commit -m 'Add feature'
 
-> *Add screenshots to **`frontend/public/screenshots/`** and update paths.*
+Push branch: git push origin feature/your-feature
 
-| Gallery View | Upload Form |
-| ------------ | ----------- |
-|              |             |
+Open a PR
 
----
-
-## Contributing
-
-1. Fork the repo
-2. Create a new branch (`git checkout -b feature/some-feature`)
-3. Commit your changes (`git commit -m 'Add some feature'`)
-4. Push to your fork (`git push origin feature/some-feature`)
-5. Open a Pull Request
-
----
-
-## License
-
-Licensed under the [MIT License](./LICENSE).
+📄 License
+MIT — see LICENSE for details.
 

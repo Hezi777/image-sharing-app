@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -6,6 +6,8 @@ import * as path from 'path';
 // Business logic layer for image uploads, queries, likes, and comments
 @Injectable()
 export class ImageService {
+  private readonly logger = new Logger(ImageService.name);
+  
   constructor(private prisma: PrismaService) {}
 
   // Save new image metadata to the database
@@ -17,7 +19,8 @@ export class ImageService {
   //  - Includes comments and user information
   //  - Supports optional text search across description and comment text
   //  - Filters out missing or deleted files
-  async findAll(search?: string) {
+  //  - Supports pagination with page and limit parameters
+  async findAll(search?: string, page: number = 1, limit: number = 10) {
     const trimmed = (search || '').trim();
 
     const whereClause = trimmed
@@ -29,6 +32,14 @@ export class ImageService {
         }
       : undefined;
 
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+    
+    // Get total count for pagination metadata
+    const totalCount = await this.prisma.image.count({
+      where: whereClause,
+    });
+
     const allImages = await this.prisma.image.findMany({
       where: whereClause,
       include: { 
@@ -38,6 +49,8 @@ export class ImageService {
         uploader: { select: { id: true, username: true } }
       },
       orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
     });
 
     const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
@@ -47,7 +60,18 @@ export class ImageService {
       return fs.existsSync(filePath);
     });
 
-    return validImages;
+    // Return paginated response with metadata
+    return {
+      data: validImages,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        hasNext: page < Math.ceil(totalCount / limit),
+        hasPrev: page > 1,
+      },
+    };
   }
 
   // Atomically increment like count for given image ID
@@ -75,7 +99,7 @@ export class ImageService {
 
   // Delete an image and its file
   async delete(id: number) {
-    console.log(`Attempting to delete image with ID: ${id}`);
+    this.logger.debug(`Attempting to delete image with ID: ${id}`);
     
     // Get image info to delete the file
     const image = await this.prisma.image.findUnique({
@@ -83,23 +107,23 @@ export class ImageService {
     });
 
     if (!image) {
-      console.log(`Image with ID ${id} not found`);
+      this.logger.warn(`Image with ID ${id} not found`);
       throw new Error('Image not found');
     }
 
-    console.log(`Found image: ${image.filename}`);
+    this.logger.debug(`Found image: ${image.filename}`);
 
     // Delete the file from filesystem
     const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
     const filePath = path.join(uploadsDir, image.filename);
     
-    console.log(`Checking file path: ${filePath}`);
+    this.logger.debug(`Checking file path: ${filePath}`);
     
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
-      console.log(`Deleted file: ${filePath}`);
+      this.logger.debug(`Deleted file: ${filePath}`);
     } else {
-      console.log(`File not found: ${filePath}`);
+      this.logger.warn(`File not found: ${filePath}`);
     }
 
     // Delete from database
@@ -107,7 +131,7 @@ export class ImageService {
       where: { id },
     });
     
-    console.log(`Deleted from database: ${result.id}`);
+    this.logger.debug(`Deleted from database: ${result.id}`);
     return result;
   }
 }

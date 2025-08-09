@@ -9,7 +9,9 @@ export const useAxiosAuth = () => {
     const interceptor = axios.interceptors.response.use(
       (res) => res,
       (err) => {
-        if (err?.response?.status === 401) {
+        // Only redirect to login for authenticated endpoints, not public ones like GET /images
+        if (err?.response?.status === 401 && 
+            !(err?.config?.url?.includes('/images') && err?.config?.method === 'get')) {
           logout();
           window.location.href = '/login';
         }

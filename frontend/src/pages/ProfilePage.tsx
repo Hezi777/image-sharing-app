@@ -14,6 +14,7 @@ import {
 import { GridOn as GridIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import { useAuth } from '../components/providers/AuthProvider';
 import LoadingState from '../components/homepage/LoadingState';
 import GalleryHeader from '../components/homepage/GalleryHeader';
@@ -53,9 +54,9 @@ export default function ProfilePage() {
     const fetchUserImages = async () => {
       setLoading(true);
       try {
-        const res = await axios.get<Image[]>('/images');
-        const filteredImages = res.data.filter(
-          (img) => img.uploader.id === user?.id
+        const res = await axios.get('/images');
+        const filteredImages = res.data.data.filter(
+          (img: any) => img.uploader.id === user?.id
         );
         setUserImages(filteredImages);
       } catch (err) {

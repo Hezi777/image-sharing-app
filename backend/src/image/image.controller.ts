@@ -19,6 +19,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ImageService } from './image.service';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { randomUUID } from 'crypto';
 
 // Main controller for image-related endpoints: upload, list, like, comment
 @Controller('images')
@@ -32,11 +33,15 @@ export class ImageController {
     storage: diskStorage({
       destination: './uploads', // Store files in uploads directory
       filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const extension = extname(file.originalname); // Get original file extension
-        cb(null, `${uniqueSuffix}${extension}`);
+        const filename = `${randomUUID()}${extname(file.originalname).toLowerCase()}`;
+        cb(null, filename);
       }
-    })
+    }),
+    fileFilter: (_req, file, cb) => {
+      const allowed = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+      cb(null, allowed.has(file.mimetype));
+    },
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
   }))
   upload(
     @UploadedFile() file: Express.Multer.File,
@@ -87,7 +92,13 @@ export class ImageController {
 
   // Fetch all images (with comments, likes, etc.)
   @Get()
-  all(@Query('search') search?: string) {
-    return this.svc.findAll(search);
+  all(
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 10;
+    return this.svc.findAll(search, pageNum, limitNum);
   }
 }

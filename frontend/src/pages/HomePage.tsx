@@ -8,6 +8,7 @@ import {
   Snackbar,
 } from '@mui/material';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 import { useEffect, useState } from 'react';
 import ImageCard from '../components/homepage/ImageCard';
 import GalleryHeader from '../components/homepage/GalleryHeader';
@@ -41,27 +42,82 @@ export default function HomePage() {
   const [newComment, setNewComment] = useState<{ [key: number]: string }>({});
   const [likedImages, setLikedImages] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showLoginAlert, setShowLoginAlert] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const [totalPages, setTotalPages] = useState(0);
 
   const { user, isAuthenticated } = useAuth();
   const { showSearch, setShowSearch } = useSearch();
 
-  useEffect(() => {
-    const fetchImages = async () => {
+  // Fetch images with pagination support
+  const fetchImages = async (page: number = 1, isLoadMore: boolean = false) => {
+    if (isLoadMore) {
+      setLoadingMore(true);
+    } else {
       setLoading(true);
-      try {
-        const res = await axios.get<Image[]>('/images', {
-          params: searchTerm ? { search: searchTerm } : {},
-        });
-        setImages(res.data);
-      } finally {
-        setLoading(false);
+      setImages([]); // Clear existing images for new search
+      setCurrentPage(1);
+    }
+
+    try {
+      const res = await axios.get('/images', {
+        params: {
+          page,
+          limit: 10,
+          ...(searchTerm ? { search: searchTerm } : {}),
+        },
+      });
+
+      const { data: newImages, pagination } = res.data;
+      
+      if (isLoadMore) {
+        setImages(prev => [...prev, ...newImages]);
+      } else {
+        setImages(newImages);
+      }
+
+      setHasNextPage(pagination.hasNext);
+      setTotalPages(pagination.totalPages);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error('Failed to fetch images:', error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  // Load more images for infinite scroll
+  const loadMoreImages = () => {
+    if (!loadingMore && hasNextPage) {
+      fetchImages(currentPage + 1, true);
+    }
+  };
+
+  // Initial load and search term changes
+  useEffect(() => {
+    fetchImages(1, false);
+  }, [searchTerm]);
+
+  // Infinite scroll detection
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 100 >= 
+        document.documentElement.offsetHeight &&
+        !loadingMore &&
+        hasNextPage
+      ) {
+        loadMoreImages();
       }
     };
 
-    fetchImages();
-  }, [searchTerm]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadingMore, hasNextPage, currentPage]);
 
   const like = async (id: number) => {
     if (!isAuthenticated) {
@@ -229,6 +285,13 @@ export default function HomePage() {
                 } // ✅ fixed type
               />
             ))}
+          </Box>
+        )}
+
+        {/* Loading indicator for infinite scroll */}
+        {loadingMore && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+            <LoadingState />
           </Box>
         )}
 
