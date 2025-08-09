@@ -18,9 +18,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/Hezi777/image-sharing-app/" />
-  <img src="https://img.shields.io/github/issues/Hezi777/image-sharing-app/" />
-  <img src="https://img.shields.io/github/issues-pr/Hezi777/image-sharing-app/" />
+  <img src="https://img.shields.io/github/license/Hezi777/image-sharing-app?style=for-the-badge" />
+  <img src="https://img.shields.io/github/issues/Hezi777/image-sharing-app?style=for-the-badge" />
+  <img src="https://img.shields.io/github/issues-pr/Hezi777/image-sharing-app?style=for-the-badge" />
 </p>
 
 ---
