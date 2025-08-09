@@ -36,7 +36,6 @@
 ---
 ## 📸 Screenshots
 
-<<<<<<< HEAD
 Below are all the available screenshots showcasing Lumia's features and interface.  
 *(Demo content generated with sample travel and lifestyle images for presentation purposes.)*
 
