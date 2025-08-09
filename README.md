@@ -17,66 +17,10 @@
   <img src="https://img.shields.io/badge/Material--UI-007FFF?logo=mui&logoColor=white" />
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/github/license/Hezi777/image-sharing-app?style=for-the-badge" />
-  <img src="https://img.shields.io/github/issues/Hezi777/image-sharing-app?style=for-the-badge" />
-  <img src="https://img.shields.io/github/issues-pr/Hezi777/image-sharing-app?style=for-the-badge" />
-</p>
-
 ---
 
-## ✨ Features
+## 🚀 Quick Start
 
-- 📤 **Image Upload** — drag-and-drop with preview & validation  
-- 🖼 **Responsive Gallery** — infinite scroll & image metadata  
-- ❤️ **Likes & Comments** — real-time optimistic updates  
-- 📱 **Mobile-First Design** — works seamlessly on any device  
-- 🔌 **REST API** — structured and documented for easy integration  
-
----
-## 📸 Screenshots
-
-Below are all the available screenshots showcasing Lumia's features and interface.  
-*(Demo content generated with sample travel and lifestyle images for presentation purposes.)*
-
-| Home Gallery (Infinite Scroll) | Image Upload Interface |
-|--------------------------------|------------------------|
-| ![Home Gallery](frontend/public/Screenshots/Gallery.gif) | ![Upload Page](frontend/public/Screenshots/UploadPage.png) |
-
-| User Authentication | User Profile |
-|--------------------|--------------|
-| ![Login](frontend/public/Screenshots/LoginPage.png) | ![Profile](frontend/public/Screenshots/ProfilePage.png) |
-
-| Registration | Dark Mode Theme |
-|--------------|----------------|
-| ![Register](frontend/public/Screenshots/RegisterPage.png) | ![Dark Mode](frontend/public/Screenshots/DarkMode.png) |
-
----
-
-### **Screenshot Details**
-1. **Gallery.gif** — Infinite scroll functionality showing images loading dynamically as user scrolls  
-2. **UploadPage.png** — Drag & drop upload interface with preview, description field, and file validation  
-3. **LoginPage.png** — Clean Material-UI authentication screen with glassmorphism styling  
-4. **RegisterPage.png** — User registration form with password confirmation validation  
-5. **ProfilePage.png** — Personal gallery grid with post stats and inline username editing  
-6. **DarkMode.png** — Dark theme toggle with persistent preference and modern UI styling
-
----
-
-## 🛠 Tech Stack
-
-| Layer     | Technology |
-|-----------|------------|
-| **Frontend** | React 19, TypeScript, Material-UI, React Router, Axios |
-| **Backend**  | NestJS 9, TypeScript, Prisma ORM, Multer |
-| **Database** | PostgreSQL 14 |
-| **Storage**  | Local filesystem (`uploads/`) |
-
----
-
-## 🚀 Getting Started
-
-### 1️⃣ Clone the Repository
 ```bash
 git clone https://github.com/yourname/lumia.git
 cd lumia
